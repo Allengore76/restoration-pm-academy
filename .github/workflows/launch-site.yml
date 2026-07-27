@@ -1,4 +1,4 @@
-name: Launch Restoration PM Academy
+name: Expand Restoration PM Academy Source
 
 on:
   push:
@@ -10,20 +10,15 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
-  group: restoration-pm-academy-pages
+  group: restoration-pm-academy-source
   cancel-in-progress: false
 
 jobs:
-  launch:
+  expand:
     if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Check out repository
@@ -32,13 +27,11 @@ jobs:
       - name: Expand staged site bundle
         shell: bash
         run: |
-          if compgen -G "bootstrap/part-*" > /dev/null; then
-            cat bootstrap/part-* > /tmp/restoration-pm-academy.tar.gz.b64
-            base64 --decode /tmp/restoration-pm-academy.tar.gz.b64 > /tmp/restoration-pm-academy.tar.gz
-            echo "782b3d1616554bdf4a3c53bf6a2b67df0418d7a9bc72e79c1873cfe2d9260657  /tmp/restoration-pm-academy.tar.gz" | sha256sum -c -
-            tar -xzf /tmp/restoration-pm-academy.tar.gz -C .
-            rm -rf bootstrap
-          fi
+          cat bootstrap/part-* > /tmp/restoration-pm-academy.tar.gz.b64
+          base64 --decode /tmp/restoration-pm-academy.tar.gz.b64 > /tmp/restoration-pm-academy.tar.gz
+          echo "782b3d1616554bdf4a3c53bf6a2b67df0418d7a9bc72e79c1873cfe2d9260657  /tmp/restoration-pm-academy.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/restoration-pm-academy.tar.gz -C .
+          rm -rf bootstrap
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -51,22 +44,8 @@ jobs:
       - name: Commit expanded application source
         shell: bash
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "Launch interactive academy pilot"
-            git push
-          fi
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: docs
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Launch interactive academy pilot"
+          git push
