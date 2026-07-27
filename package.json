@@ -1,0 +1,17 @@
+{
+  "name": "restoration-pm-academy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Interactive training for restoration and construction project managers.",
+  "scripts": {
+    "check": "node --check api/grade.js && node scripts/validate-bundle.mjs",
+    "start": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "openai": "^6.48.0"
+  }
+}
