@@ -1,0 +1,72 @@
+name: Launch Restoration PM Academy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "bootstrap/ready"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: restoration-pm-academy-pages
+  cancel-in-progress: false
+
+jobs:
+  launch:
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Expand staged site bundle
+        shell: bash
+        run: |
+          if compgen -G "bootstrap/part-*" > /dev/null; then
+            cat bootstrap/part-* > /tmp/restoration-pm-academy.tar.gz.b64
+            base64 --decode /tmp/restoration-pm-academy.tar.gz.b64 > /tmp/restoration-pm-academy.tar.gz
+            echo "782b3d1616554bdf4a3c53bf6a2b67df0418d7a9bc72e79c1873cfe2d9260657  /tmp/restoration-pm-academy.tar.gz" | sha256sum -c -
+            tar -xzf /tmp/restoration-pm-academy.tar.gz -C .
+            rm -rf bootstrap
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate the application
+        run: npm run check
+
+      - name: Commit expanded application source
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Launch interactive academy pilot"
+            git push
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
